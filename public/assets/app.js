@@ -22,7 +22,7 @@ document.getElementById('import-form')?.addEventListener('submit', event => {
     const button = event.currentTarget.querySelector('button[type="submit"]');
     button.disabled = true;
     button.textContent = 'Recupero delle lezioni…';
-    document.getElementById('form-status').textContent = 'Attendi senza chiudere la pagina. Nessuna credenziale verrà conservata.';
+    document.getElementById('form-status').textContent = 'Un attimo, sto recuperando le tue lezioni…';
 });
 document.querySelectorAll('[data-confirm]').forEach(form => {
     form.addEventListener('submit', event => {

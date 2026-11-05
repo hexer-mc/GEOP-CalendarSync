@@ -6,6 +6,7 @@ if (PHP_VERSION_ID < 80300) {
 }
 
 require_once __DIR__ . '/Calendar/Lesson.php';
+require_once __DIR__ . '/Calendar/AcademicYear.php';
 require_once __DIR__ . '/Calendar/Icalendar.php';
 require_once __DIR__ . '/Calendar/Snapshot.php';
 require_once __DIR__ . '/Geop/EventParser.php';
