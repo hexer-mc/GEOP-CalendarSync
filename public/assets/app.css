@@ -24,11 +24,32 @@ a { color: #245ba0; }
 .consent input { margin-top: 4px; }
 .note { font-size: 12px; color: #555; }
 .message { padding: 10px; border: 1px solid #aaa; }
+.message.success { margin: 0 0 24px; padding: 14px 16px; border: 1px solid #bddcc5; border-radius: 8px; background: #edf8ef; color: #24613a; }
 .error { color: #9b2020; border-color: #c68f8f; }
 section { margin-block: 24px; padding-bottom: 12px; border-bottom: 1px solid #ddd; }
 .copy-row { display: flex; gap: 8px; }
 .account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 24px; }
 .account-actions button { font-size: 12px; }
+.calendar-result { margin: 0; padding: 0; border: 0; }
+.result-heading { margin-bottom: 24px; text-align: center; }
+.ready-icon { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #eaf5ec; color: #23783c; font-size: 24px; }
+.result-heading h1 { margin: 12px 0 6px; font-size: 27px; line-height: 1.25; color: #275537; }
+.result-heading p { margin: 0; }
+.feed-card { padding: 16px; border: 1px solid #d8e4db; border-radius: 8px; background: #f7faf7; }
+.feed-label { display: flex; align-items: center; gap: 7px; margin: 0 0 10px; color: #365744; font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+.feed-card input { font-family: ui-monospace, monospace; font-size: 12px; }
+.feed-card .note:last-child { margin-bottom: 0; }
+.link-warning { color: #b4565d; }
+.copy-button { flex-shrink: 0; border-color: #23783c; border-radius: 6px; background: #23783c; color: white; font-size: 12px; }
+.calendar-guides { display: grid; gap: 14px; margin: 24px 0; }
+.calendar-guide { padding: 18px; border: 1px solid #dde4df; border-radius: 8px; }
+.calendar-guide h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 16px; }
+.calendar-guide h2 img { flex-shrink: 0; object-fit: contain; }
+.calendar-guide ol { margin: 14px 0 0; padding-left: 20px; font-size: 13px; color: #4e5d53; line-height: 1.7; }
+.calendar-guide li + li { margin-top: 6px; }
+.calendar-guide p { margin: 12px 0 0; font-size: 13px; color: #4e5d53; line-height: 1.7; }
+.secondary-button { border-color: #bfd2c4; border-radius: 6px; background: #f0f6f1; color: #275537; }
+.delete-button { border-color: #ddd; border-radius: 6px; background: white; color: #865454; }
 details { margin-top: 28px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 13px; }
 summary { padding: 12px 14px; border: 1px solid #cad9cd; border-radius: 6px; background: #edf4ee; color: #2e5439; font-size: 14px; font-weight: 600; cursor: pointer; }
 .page-footer { margin-top: 32px; text-align: center; }

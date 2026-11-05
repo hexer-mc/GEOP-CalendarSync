@@ -28,13 +28,28 @@ final class EventParser
         }
 
         $lessons = [];
-        $seen = [];
-        foreach ($events as $event) {
-            if (!$event instanceof stdClass || !is_int($event->id ?? null) || $event->id <= 0
-                || !is_string($event->title ?? null) || isset($seen[$event->id])) {
-                throw new InvalidArgumentException('Evento GEOP non valido o ID duplicato.');
+        foreach ($events as $index => $event) {
+            $row = $index + 1;
+            if (!$event instanceof stdClass) {
+                throw new InvalidArgumentException("Evento GEOP n. $row: oggetto JSON atteso.");
             }
-            $seen[$event->id] = true;
+            $rawId = $event->id ?? null;
+            $id = is_string($rawId) && ctype_digit($rawId) ? ltrim($rawId, '0') : $rawId;
+            $id = (is_int($id) || (is_string($id) && ctype_digit($id)))
+                ? filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) : false;
+            $rendering = $event->rendering ?? '';
+            if ($id === false && in_array($rendering, ['background', 'inverse-background'], true)) {
+                // Evidenziazioni FullCalendar senza ID lezione: non sono lezioni da esportare.
+                continue;
+            }
+            if ($id === false) {
+                $value = is_int($rawId) ? ", valore $rawId" : '';
+                $kind = $rendering === '' ? 'normale' : 'non riconosciuto';
+                throw new InvalidArgumentException("Evento GEOP n. $row: ID non valido (tipo " . get_debug_type($rawId) . "$value; rendering $kind).");
+            }
+            if (!is_string($event->title ?? null)) {
+                throw new InvalidArgumentException("Evento GEOP n. $row: titolo assente o non testuale.");
+            }
             $location = '';
             if (isset($event->tooltip) && is_string($event->tooltip)) {
                 foreach (explode("\n", $this->text($event->tooltip)) as $line) {
@@ -44,16 +59,20 @@ final class EventParser
                     }
                 }
             }
-            $lessons[] = new Lesson(
-                id: $calendarKey . ':lesson:' . $event->id,
+            $lesson = new Lesson(
+                id: $calendarKey . ':lesson:' . $id,
                 title: $this->text($event->title),
                 start: $this->date($event->start ?? null),
                 end: $this->date($event->end ?? null),
                 updatedAt: $observedAt,
                 location: $location,
             );
+            if (isset($lessons[$id]) && $lessons[$id] != $lesson) {
+                throw new InvalidArgumentException("Evento GEOP n. $row: lo stesso ID identifica lezioni diverse.");
+            }
+            $lessons[$id] = $lesson;
         }
-        return $lessons;
+        return array_values($lessons);
     }
 
     private function date(mixed $value): DateTimeImmutable

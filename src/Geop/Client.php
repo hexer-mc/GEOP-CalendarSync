@@ -86,7 +86,12 @@ final class Client
                     '_' => (string) (int) (microtime(true) * 1000),
                 ], '', '&', PHP_QUERY_RFC3986);
                 $json = $this->request($handle, 'json/fullcalendar_events_alunno.asp?' . $query, 'Lettura calendario');
-                foreach ((new EventParser())->parse($json, "geop:ente:$entityId:alunno:$studentId", $observedAt) as $lesson) {
+                try {
+                    $events = (new EventParser())->parse($json, "geop:ente:$entityId:alunno:$studentId", $observedAt);
+                } catch (InvalidArgumentException $error) {
+                    throw new InvalidArgumentException('Calendario dal ' . $cursor->format('Y-m-d') . ' al ' . $next->format('Y-m-d') . ': ' . $error->getMessage());
+                }
+                foreach ($events as $lesson) {
                     if (isset($lessons[$lesson->id]) && $lessons[$lesson->id] != $lesson) {
                         throw new RuntimeException('Calendario cambiato durante la lettura. Nessun aggiornamento salvato: riprova.');
                     }

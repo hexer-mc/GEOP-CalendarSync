@@ -59,7 +59,8 @@ final readonly class Snapshot
 
     public function metadata(): array
     {
-        return $this->read()['metadata'] ?? [];
+        $data = $this->read();
+        return $data === null ? [] : array_merge($data['metadata'] ?? [], ['count' => count($data['events'])]);
     }
 
     public function authorizedCalendar(string $token): ?string

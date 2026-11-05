@@ -94,7 +94,6 @@ try {
             session_regenerate_id(true);
             $_SESSION['account'] = $account;
             $_SESSION['authenticated_at'] = time();
-            $_SESSION['notice'] = 'Fatto! Il tuo calendario è pronto, con ' . count($lessons) . ' lezioni importate.';
         } else {
             throw new RuntimeException('Operazione non disponibile.');
         }
@@ -132,13 +131,15 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
 <main>
     <h1 class="page-logo"><img src="assets/images/geopcalsync_logo_transparent.png" alt="GEOP Calendar Sync" width="1024" height="1024"></h1>
     <p class="independent-note">Progetto indipendente da GEOP.</p>
+    <?php if (!$feed): ?>
     <p class="intro">GEOP Calendar Sync ti permette di importare il tuo calendario delle lezioni su Google Calendar o Apple Calendar</p>
     <p class="intro-more">Trovi più informazioni sotto.</p>
+    <?php endif; ?>
 
     <?php if ($error): ?>
         <p class="message error" role="alert"><?= escape($error) ?></p>
     <?php endif; ?>
-    <?php if ($notice): ?>
+    <?php if ($notice && !$feed): ?>
         <p class="message" role="status"><?= escape($notice) ?></p>
     <?php endif; ?>
     <?php if (!$secure): ?>
@@ -146,19 +147,58 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
     <?php endif; ?>
 
     <?php if ($feed): ?>
-        <section aria-labelledby="feed-title">
-            <h2 id="feed-title">Calendario pronto</h2>
-            <label for="feed-url">Link personale</label>
-            <div class="copy-row">
-                <input id="feed-url" data-absolute-url readonly value="<?= escape($feed) ?>">
-                <button type="button" data-copy="feed-url">Copia</button>
-            </div>
-            <p class="note">Google Calendar: Altri calendari → + → Da URL. Poi puoi mostrarlo in Notion Calendar con lo stesso account Google.</p>
-            <p class="note">Apple Calendar: Calendari → Aggiungi calendario con iscrizione. Su Mac: File → Nuova iscrizione a calendario.</p>
-            <p class="note">Non condividere il link. Per aggiornare le lezioni, ripeti il login. Google può mostrare le modifiche con ritardo.</p>
-        </section>
-    <?php endif; ?>
+        <p class="message success" role="status">Fatto! Il tuo calendario è pronto, con <?= $metadata['count'] ?> <?= $metadata['count'] === 1 ? 'lezione importata.' : 'lezioni importate.' ?></p>
+        <section class="calendar-result" aria-labelledby="feed-title">
+            <header class="result-heading">
+                <span class="ready-icon" aria-hidden="true">✓</span>
+                <h1 id="feed-title">Il tuo calendario è pronto.</h1>
+                <p class="note">Scegli dove vuoi visualizzare le tue lezioni.</p>
+            </header>
 
+            <div class="feed-card">
+                <label class="feed-label" for="feed-url"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m10 13 4-4m-6 6-1 1a4 4 0 0 1-6-6l4-4a4 4 0 0 1 6 0m2 3 1-1a4 4 0 0 1 6 6l-4 4a4 4 0 0 1-6 0"/></svg> Link personale:</label>
+                <div class="copy-row">
+                    <input id="feed-url" data-absolute-url readonly value="<?= escape($feed) ?>">
+                    <button class="copy-button" type="button" data-copy="feed-url">Copia link</button>
+                </div>
+                <p class="note">Questo è il collegamento al tuo calendario: contiene titoli, orari e aule delle lezioni.</p>
+                <p class="note link-warning">Non condividere il link.</p>
+            </div>
+
+            <div class="calendar-guides">
+                <article class="calendar-guide">
+                    <h2><img src="assets/images/google-calendar.svg" alt="" width="30" height="30"> Google Calendar</h2>
+                    <ol>
+                        <li>Apri <a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">Google Calendar</a> da computer.</li>
+                        <li>Accanto ad <strong>Altri calendari</strong>, premi <strong>+ → Da URL</strong>.</li>
+                        <li>Incolla il link e premi <strong>Aggiungi calendario</strong>.</li>
+                    </ol>
+                    <p class="note">Usi Notion Calendar? Mostra il nuovo calendario nell’account Google collegato.</p>
+                </article>
+
+                <article class="calendar-guide">
+                    <h2><img src="assets/images/apple.svg" alt="" width="28" height="30"> Apple Calendar</h2>
+                    <p><strong>iPhone e iPad:</strong> apri Calendario → Calendari → Aggiungi calendario → Aggiungi calendario con iscrizione.</p>
+                    <p><strong>Mac:</strong> apri Calendario → File → Nuova iscrizione a calendario.</p>
+                    <p>Incolla il link e conferma. Scegli <strong>iCloud</strong> come account se vuoi ritrovarlo sugli altri dispositivi Apple.</p>
+                </article>
+            </div>
+
+            <p class="info-row"><span class="info-icon" aria-hidden="true">i</span><span>Per recuperare modifiche da GEOP, fai una nuova importazione: il link resta uguale. Google e Apple possono impiegare un po’ di tempo a mostrarle.</span></p>
+            <div class="account-actions">
+                <form method="post" action="./">
+                    <input type="hidden" name="csrf" value="<?= escape($csrf) ?>">
+                    <input type="hidden" name="action" value="logout">
+                    <button class="secondary-button" type="submit">Nuova importazione</button>
+                </form>
+                <form method="post" action="./" data-confirm="Eliminare il calendario e disattivare il link? Le copie già scaricate non vengono eliminate.">
+                    <input type="hidden" name="csrf" value="<?= escape($csrf) ?>">
+                    <input type="hidden" name="action" value="delete">
+                    <button class="delete-button" type="submit">Elimina calendario e link</button>
+                </form>
+            </div>
+        </section>
+    <?php else: ?>
     <form method="post" action="./" id="import-form">
         <input type="hidden" name="csrf" value="<?= escape($csrf) ?>">
         <input type="hidden" name="action" value="import">
@@ -172,24 +212,9 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
             <input name="consent" type="checkbox" value="1" required>
             <span>Ho letto la nota e autorizzo il recupero delle mie lezioni.</span>
         </label>
-        <button class="import-button" type="submit" <?= !$secure || !$csrf ? 'disabled' : '' ?>><?= $feed ? 'Aggiorna calendario' : 'Importa calendario' ?></button>
+        <button class="import-button" type="submit" <?= !$secure || !$csrf ? 'disabled' : '' ?>>Importa calendario</button>
         <p class="note" id="form-status" role="status"></p>
     </form>
-
-    <?php if ($feed): ?>
-        <div class="account-actions">
-            <form method="post" action="./">
-                <input type="hidden" name="csrf" value="<?= escape($csrf) ?>">
-                <input type="hidden" name="action" value="logout">
-                <button type="submit">Chiudi pannello</button>
-            </form>
-            <form method="post" action="./" data-confirm="Eliminare il calendario e disattivare il link? Le copie già scaricate non vengono eliminate.">
-                <input type="hidden" name="csrf" value="<?= escape($csrf) ?>">
-                <input type="hidden" name="action" value="delete">
-                <button type="submit">Elimina calendario e link</button>
-            </form>
-        </div>
-    <?php endif; ?>
 
     <details>
         <summary>Altre informazioni</summary>
@@ -198,6 +223,7 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
         <p class="note">Puoi eseguire il progetto sul tuo dispositivo. Il file locale opzionale conserva le credenziali solo se scegli di compilarlo.</p>
         <p class="note">Per consultare il codice sorgente, visita la pagina GitHub del progetto dal logo in fondo alla pagina.</p>
     </details>
+    <?php endif; ?>
     <p id="copy-status" class="note" role="status"></p>
     <footer class="page-footer">
         <?php if ($source): ?>
