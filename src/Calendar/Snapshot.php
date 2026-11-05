@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Geop\Calendar;
 
 use DateTimeImmutable;
+use DateTimeZone;
 use RuntimeException;
 
 final readonly class Snapshot
@@ -61,6 +62,46 @@ final readonly class Snapshot
     {
         $data = $this->read();
         return $data === null ? [] : array_merge($data['metadata'] ?? [], ['count' => count($data['events'])]);
+    }
+
+    /** @return list<array{title: string, location: string, start: DateTimeImmutable, end: DateTimeImmutable}> */
+    public function preview(): array
+    {
+        $data = $this->read();
+        if ($data === null) {
+            return [];
+        }
+        // shortcut: legge solo ICS generati dall'app, usare un parser completo se si importano feed esterni.
+        $calendar = str_replace(["\r\n ", "\r\n\t"], '', $data['calendar']);
+        preg_match_all('/BEGIN:VEVENT\r\n(.*?)\r\nEND:VEVENT\r\n/s', $calendar, $matches);
+        $lessons = [];
+        foreach ($matches[1] as $block) {
+            $fields = [];
+            foreach (explode("\r\n", $block) as $line) {
+                $parts = explode(':', $line, 2);
+                if (count($parts) !== 2) {
+                    throw new RuntimeException('Anteprima non disponibile: riga salvata non valida.');
+                }
+                [$name, $value] = $parts;
+                $fields[$name] = $value;
+            }
+            if (!isset($fields['SUMMARY'], $fields['DTSTART'], $fields['DTEND'])) {
+                throw new RuntimeException('Anteprima non disponibile: evento salvato non valido.');
+            }
+            foreach (['DTSTART', 'DTEND'] as $name) {
+                $date = DateTimeImmutable::createFromFormat('!Ymd\THis\Z', $fields[$name], new DateTimeZone('UTC'));
+                if ($date === false || $date->format('Ymd\THis\Z') !== $fields[$name]) {
+                    throw new RuntimeException('Anteprima non disponibile: data salvata non valida.');
+                }
+                $fields[$name] = $date;
+            }
+            foreach (['SUMMARY', 'LOCATION'] as $name) {
+                $fields[$name] = strtr($fields[$name] ?? '', ['\\n' => "\n", '\\N' => "\n", '\\,' => ',', '\\;' => ';', '\\\\' => '\\']);
+            }
+            $lessons[] = ['title' => $fields['SUMMARY'], 'location' => $fields['LOCATION'], 'start' => $fields['DTSTART'], 'end' => $fields['DTEND']];
+        }
+        usort($lessons, static fn (array $a, array $b): int => $a['start'] <=> $b['start']);
+        return array_slice($lessons, 0, 10);
     }
 
     public function authorizedCalendar(string $token): ?string

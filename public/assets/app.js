@@ -1,5 +1,7 @@
 'use strict';
 
+let copyStatusTimer;
+
 document.querySelectorAll('[data-absolute-url]').forEach(input => {
     input.value = new URL(input.value, window.location.href).href;
 });
@@ -7,15 +9,18 @@ document.querySelectorAll('[data-copy]').forEach(button => {
     button.addEventListener('click', async () => {
         const input = document.getElementById(button.dataset.copy);
         const status = document.getElementById('copy-status');
+        status.classList.remove('error');
         try {
             await navigator.clipboard.writeText(input.value);
-            status.textContent = 'Link copiato. Conservalo in un posto sicuro.';
+            status.textContent = 'Link copiato!';
         } catch {
             input.focus();
             input.select();
-            status.textContent = 'Seleziona e copia il link dal campo.';
+            status.classList.add('error');
+            status.textContent = 'Seleziona il link e copialo manualmente.';
         }
-        setTimeout(() => { status.textContent = ''; }, 5000);
+        clearTimeout(copyStatusTimer);
+        copyStatusTimer = setTimeout(() => { status.textContent = ''; }, 3000);
     });
 });
 document.getElementById('import-form')?.addEventListener('submit', event => {

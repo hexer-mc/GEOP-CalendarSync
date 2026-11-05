@@ -16,6 +16,7 @@ $store = null;
 $error = '';
 $notice = '';
 $metadata = [];
+$preview = [];
 $account = null;
 $source = getenv('GEOFETCH_SOURCE_URL') ?: 'https://github.com/hexer-mc/GEOP-CalendarSync';
 if (!filter_var($source, FILTER_VALIDATE_URL) || parse_url($source, PHP_URL_SCHEME) !== 'https') {
@@ -103,7 +104,9 @@ try {
     }
     $account = $_SESSION['account'] ?? null;
     if (is_string($account)) {
-        $metadata = $store->snapshot($account)->metadata();
+        $snapshot = $store->snapshot($account);
+        $metadata = $snapshot->metadata();
+        $preview = $snapshot->preview();
     }
     $notice = $_SESSION['notice'] ?? '';
     unset($_SESSION['notice']);
@@ -147,7 +150,27 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
     <?php endif; ?>
 
     <?php if ($feed): ?>
-        <p class="message success" role="status">Fatto! Il tuo calendario è pronto, con <?= $metadata['count'] ?> <?= $metadata['count'] === 1 ? 'lezione importata.' : 'lezioni importate.' ?></p>
+        <div class="message success">
+            <p class="success-message" role="status">Fatto! Il tuo calendario è pronto, con <?= $metadata['count'] ?> <?= $metadata['count'] === 1 ? 'lezione importata.' : 'lezioni importate.' ?></p>
+            <?php if ($preview): ?>
+                <details class="lesson-preview">
+                    <summary>Anteprima di <?= count($preview) ?> <?= count($preview) === 1 ? 'lezione importata' : 'lezioni importate' ?></summary>
+                    <ol class="preview-lessons">
+                        <?php foreach ($preview as $lesson): ?>
+                            <?php $lessonStart = $lesson['start']->setTimezone($zone); $lessonEnd = $lesson['end']->setTimezone($zone); ?>
+                            <li>
+                                <strong><?= escape($lesson['title']) ?></strong>
+                                <div class="preview-meta">
+                                    <time datetime="<?= $lessonStart->format(DATE_ATOM) ?>"><?= $lessonStart->format('d/m/Y') ?></time>
+                                    <span><?= $lessonStart->format('H:i') ?> – <?= $lessonEnd->format('H:i') ?><?= $lessonStart->format('Y-m-d') !== $lessonEnd->format('Y-m-d') ? ' del ' . $lessonEnd->format('d/m/Y') : '' ?></span>
+                                    <span>Aula: <?= $lesson['location'] !== '' ? escape($lesson['location']) : 'non indicata' ?></span>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                </details>
+            <?php endif; ?>
+        </div>
         <section class="calendar-result" aria-labelledby="feed-title">
             <header class="result-heading">
                 <span class="ready-icon" aria-hidden="true">✓</span>
@@ -163,6 +186,13 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
                 </div>
                 <p class="note">Questo è il collegamento al tuo calendario: contiene titoli, orari e aule delle lezioni.</p>
                 <p class="note link-warning">Non condividere il link.</p>
+                <?php if ($local): ?>
+                    <div class="local-feed-note">
+                        <p>Questo link è locale: Google Calendar non può raggiungere il tuo PC. La sincronizzazione richiede un link HTTPS pubblico.</p>
+                        <p>Per provarlo subito, scarica il file e caricalo in Google Calendar da <strong>Impostazioni → Importazione ed esportazione → Importa</strong>. Sarà una copia delle lezioni, senza aggiornamenti automatici.</p>
+                        <a class="download-link" href="<?= escape($feed) ?>" download="geop-calendar.ics">Scarica il file .ics</a>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="calendar-guides">
@@ -224,7 +254,7 @@ $feed = isset($metadata['token']) && is_string($account) ? 'feed.php?id=' . rawu
         <p class="note">Per consultare il codice sorgente, visita la pagina GitHub del progetto dal logo in fondo alla pagina.</p>
     </details>
     <?php endif; ?>
-    <p id="copy-status" class="note" role="status"></p>
+    <p id="copy-status" class="copy-toast" role="status" aria-atomic="true"></p>
     <footer class="page-footer">
         <?php if ($source): ?>
             <a class="github-link" href="<?= escape($source) ?>" target="_blank" rel="noopener noreferrer" aria-label="Codice del progetto su GitHub"><img src="assets/images/github-mark.svg" alt="GitHub" width="28" height="28"></a>

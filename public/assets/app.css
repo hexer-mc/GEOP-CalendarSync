@@ -25,6 +25,14 @@ a { color: #245ba0; }
 .note { font-size: 12px; color: #555; }
 .message { padding: 10px; border: 1px solid #aaa; }
 .message.success { margin: 0 0 24px; padding: 14px 16px; border: 1px solid #bddcc5; border-radius: 8px; background: #edf8ef; color: #24613a; }
+.success-message { margin: 0; }
+.lesson-preview { margin-top: 12px; padding: 0; border: 0; }
+.lesson-preview summary { padding: 8px 10px; border-color: #bfd6c5; background: #dff0e4; font-size: 12px; }
+.preview-lessons { margin: 0; padding: 0; list-style: none; }
+.preview-lessons li { padding: 11px 0; border-top: 1px solid #cde1d2; }
+.preview-lessons li:last-child { padding-bottom: 0; }
+.preview-lessons strong { display: block; font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
+.preview-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 5px; font-size: 11px; color: #526e5b; }
 .error { color: #9b2020; border-color: #c68f8f; }
 section { margin-block: 24px; padding-bottom: 12px; border-bottom: 1px solid #ddd; }
 .copy-row { display: flex; gap: 8px; }
@@ -40,6 +48,9 @@ section { margin-block: 24px; padding-bottom: 12px; border-bottom: 1px solid #dd
 .feed-card input { font-family: ui-monospace, monospace; font-size: 12px; }
 .feed-card .note:last-child { margin-bottom: 0; }
 .link-warning { color: #b4565d; }
+.local-feed-note { margin-top: 14px; padding-top: 12px; border-top: 1px solid #d8e4db; font-size: 12px; color: #6c6149; }
+.local-feed-note p { margin: 0 0 8px; }
+.download-link { display: inline-block; padding: 7px 10px; border: 1px solid #bfd2c4; border-radius: 6px; color: #275537; text-decoration: none; background: white; }
 .copy-button { flex-shrink: 0; border-color: #23783c; border-radius: 6px; background: #23783c; color: white; font-size: 12px; }
 .calendar-guides { display: grid; gap: 14px; margin: 24px 0; }
 .calendar-guide { padding: 18px; border: 1px solid #dde4df; border-radius: 8px; }
@@ -57,5 +68,7 @@ summary { padding: 12px 14px; border: 1px solid #cad9cd; border-radius: 6px; bac
 .github-link img { display: block; }
 .github-link:hover { background: #edf4ee; }
 .page-footer p { margin: 4px 0 0; font-size: 12px; color: #6b756d; }
+.copy-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1000; width: max-content; max-width: calc(100vw - 32px); margin: 0; padding: 12px 18px; border: 1px solid #bddcc5; border-radius: 8px; background: #edf8ef; color: #24613a; box-shadow: 0 4px 20px #0002; font-size: 13px; text-align: center; }
+.copy-toast.error { background: #fff1ef; border-color: #dbb8b8; color: #9b2020; }
 #form-status:empty, #copy-status:empty { display: none; }
 @media (max-width: 480px) { main { margin-block: 24px; } }
