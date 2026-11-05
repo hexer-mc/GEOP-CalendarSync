@@ -2,7 +2,6 @@
 /README.md
 /.env.*
 !/.env.example
-/vendor/
 /var/*
 !/var/.gitkeep
 *.har
