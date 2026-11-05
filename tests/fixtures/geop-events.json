@@ -1,0 +1,12 @@
+[
+    {
+        "id": 101,
+        "title": "MOD01 - Materia di prova - Docente fittizio - Aula: DEMO-1<br>",
+        "start": "2026-11-12T14:00:00",
+        "end": "2026-11-12T18:00:00",
+        "tooltip": "Registro lezione da compilare<br>Materia: MOD01 - Materia di prova<br>Aula: DEMO-1<br>Corsi: CORSO-DEMO<br>Docente: Docente fittizio<br>",
+        "editable": false,
+        "AltraSede": "0",
+        "Timesheet": "0"
+    }
+]

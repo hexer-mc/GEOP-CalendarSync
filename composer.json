@@ -1,0 +1,7 @@
+{
+    "name": "geop/calendar-sync",
+    "description": "Importazione manuale GEOP con feed iCalendar personali",
+    "type": "project",
+    "require": { "php": ">=8.3", "ext-curl": "*", "ext-dom": "*" },
+    "scripts": { "test": ["php tests/run.php", "php tests/client.php", "php tests/snapshot.php", "php tests/portal.php"] }
+}
