@@ -1,5 +1,4 @@
 /.env
-/README.md
 /.env.*
 !/.env.example
 /var/*
